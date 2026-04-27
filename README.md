@@ -45,7 +45,7 @@ El proyecto esta configurado para iniciarse integralmente mediante Docker Compos
 
 1. Clonar el repositorio:
    ```bash
-   git clone
+   git clone https://github.com/devRocketDuoc/air-fly-trip.git
    cd air-fly-trip
 ### Compilar los microservicios:
 

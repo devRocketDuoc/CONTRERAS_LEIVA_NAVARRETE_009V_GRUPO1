@@ -1,0 +1,274 @@
+services:
+  auth-db:
+    image: mysql:8.4
+    container_name: auth-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_auth
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  terminal-db:
+    image: mysql:8.4
+    container_name: terminal-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_terminals
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  vehicle-db:
+    image: mysql:8.4
+    container_name: vehicle-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_vehicles
+    ports:
+      - "3309:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  route-db:
+    image: mysql:8.4
+    container_name: route-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_routes
+    ports:
+      - "3310:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  trip-db:
+    image: mysql:8.4
+    container_name: trip-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_trips
+    ports:
+      - "3311:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  reservation-db:
+    image: mysql:8.4
+    container_name: reservation-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_reservations
+    ports:
+      - "3312:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  tariff-db:
+    image: mysql:8.4
+    container_name: tariff-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_tariffs
+    ports:
+      - "3313:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  payment-db:
+    image: mysql:8.4
+    container_name: payment-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_payments
+    ports:
+      - "3314:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  notification-db:
+    image: mysql:8.4
+    container_name: notification-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_notifications
+    ports:
+      - "3315:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  charging-station-db:
+    image: mysql:8.4
+    container_name: charging-station-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_charging_stations
+    ports:
+      - "3316:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - airflytrip-network
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  terminal-service:
+    build: ./terminal-service
+    container_name: terminal-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      terminal-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  vehicle-service:
+    build: ./vehicle-service
+    container_name: vehicle-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      vehicle-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  route-service:
+    build: ./route-service
+    container_name: route-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      route-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  trip-service:
+    build: ./trip-service
+    container_name: trip-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      trip-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  reservation-service:
+    build: ./reservation-service
+    container_name: reservation-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      reservation-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  tariff-service:
+    build: ./tariff-service
+    container_name: tariff-service
+    ports:
+      - "8087:8087"
+    depends_on:
+      tariff-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      payment-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8089:8089"
+    depends_on:
+      notification-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+  charging-station-service:
+    build: ./charging-station-service
+    container_name: charging-station-service
+    ports:
+      - "8090:8090"
+    depends_on:
+      charging-station-db:
+        condition: service_healthy
+    networks:
+      - airflytrip-network
+
+networks:
+  airflytrip-network:
+    name: airflytrip-network

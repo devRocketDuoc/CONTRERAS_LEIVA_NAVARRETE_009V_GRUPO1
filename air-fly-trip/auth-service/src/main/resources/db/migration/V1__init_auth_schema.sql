@@ -1,8 +1,13 @@
-CREATE TABLE auth_user (
+CREATE TABLE IF NOT EXISTS auth_user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    document_number VARCHAR(50),
+    phone VARCHAR(50),
+    role VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

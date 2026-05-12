@@ -1,0 +1,8 @@
+CREATE TABLE reservation (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    trip_id BIGINT NOT NULL,
+    reservation_code VARCHAR(40) NOT NULL UNIQUE,
+    status VARCHAR(50) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

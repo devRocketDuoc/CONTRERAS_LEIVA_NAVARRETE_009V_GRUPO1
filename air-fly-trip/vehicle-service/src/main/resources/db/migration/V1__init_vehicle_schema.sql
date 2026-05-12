@@ -1,9 +1,10 @@
-CREATE TABLE vehicle (
+CREATE TABLE IF NOT EXISTS vehicle (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(30) NOT NULL UNIQUE,
-    model VARCHAR(120) NOT NULL,
-    capacity INT NOT NULL,
+    code VARCHAR(100) NOT NULL UNIQUE,
+    model VARCHAR(255) NOT NULL,
     status VARCHAR(50) NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    battery_percentage INT NOT NULL,
+    terminal_id BIGINT,
+    charging_station_id BIGINT,
+    active BOOLEAN NOT NULL DEFAULT TRUE
 );

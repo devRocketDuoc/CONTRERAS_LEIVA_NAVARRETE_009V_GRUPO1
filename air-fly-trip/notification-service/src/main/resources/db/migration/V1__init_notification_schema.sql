@@ -1,8 +1,8 @@
-CREATE TABLE notification (
+CREATE TABLE IF NOT EXISTS notification (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    recipient VARCHAR(150) NOT NULL,
-    channel VARCHAR(50) NOT NULL,
-    subject VARCHAR(150) NOT NULL,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
     status VARCHAR(50) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP

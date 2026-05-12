@@ -1,9 +1,12 @@
-CREATE TABLE trip (
+CREATE TABLE IF NOT EXISTS trip (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    vehicle_id BIGINT,
+    origin_terminal_id BIGINT NOT NULL,
+    destination_terminal_id BIGINT NOT NULL,
     route_id BIGINT NOT NULL,
-    vehicle_id BIGINT NOT NULL,
-    departure_time DATETIME NOT NULL,
-    arrival_time DATETIME,
     status VARCHAR(50) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    scheduled_at DATETIME,
+    started_at DATETIME,
+    finished_at DATETIME
 );

@@ -167,6 +167,8 @@ services:
     depends_on:
       auth-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -178,6 +180,8 @@ services:
     depends_on:
       terminal-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -189,6 +193,8 @@ services:
     depends_on:
       vehicle-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -200,6 +206,8 @@ services:
     depends_on:
       route-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -211,6 +219,8 @@ services:
     depends_on:
       trip-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -222,6 +232,8 @@ services:
     depends_on:
       reservation-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -233,6 +245,8 @@ services:
     depends_on:
       tariff-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -244,6 +258,8 @@ services:
     depends_on:
       payment-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -255,6 +271,8 @@ services:
     depends_on:
       notification-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 
@@ -266,6 +284,8 @@ services:
     depends_on:
       charging-station-db:
         condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 

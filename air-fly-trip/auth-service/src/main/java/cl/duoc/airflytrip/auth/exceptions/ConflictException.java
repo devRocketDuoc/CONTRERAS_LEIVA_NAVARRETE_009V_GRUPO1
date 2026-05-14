@@ -1,0 +1,8 @@
+package cl.duoc.airflytrip.auth.exceptions;
+
+public class ConflictException extends RuntimeException {
+
+    public ConflictException(String message) {
+        super(message);
+    }
+}

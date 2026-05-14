@@ -91,6 +91,12 @@ public class AuthService {
         return toResponse(user);
     }
 
+    public UserResponse findUserById(Long id) {
+        AppUser user = appUserRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        return toResponse(user);
+    }
+
     public UserResponse createUser(CreateUserRequest request, String creatorEmail) {
         AppUser creator = appUserRepository.findByEmail(normalizeEmail(creatorEmail))
                 .orElseThrow(() -> new NotFoundException("Creator user not found"));

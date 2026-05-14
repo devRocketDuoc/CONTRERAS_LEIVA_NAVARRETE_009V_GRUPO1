@@ -28,10 +28,62 @@ Base técnica académica para 10 microservicios Spring Boot independientes.
 
 ## Ejecución local con Docker Compose
 
+Siempre iniciar con reset completo para arrancar desde cero en todos los microservicios y sus bases.
+
+### Opción recomendada (script único)
+
+Linux / macOS / WSL:
+
 ```bash
-docker compose down -v
-docker compose up -d --build
+./scripts/reset-and-up.sh
+```
+
+Windows (CMD o PowerShell):
+
+```bat
+scripts\reset-and-up.cmd
+```
+
+### Opción manual equivalente
+
+```bash
+docker compose down --volumes --remove-orphans
+docker compose up -d --build --force-recreate
 docker compose ps
+```
+
+## Reset manual de auth-service (Flyway desde cero)
+
+Usar este flujo cuando quieras rehacer solo `auth-service` y su base `db_auth`.
+
+1. Validar nombres de migraciones Flyway (ejemplo: `V2__...sql` con doble guion bajo).
+
+```bash
+ls auth-service/src/main/resources/db/migration
+```
+
+2. Eliminar contenedor de app y base de `auth` junto con su volumen.
+
+```bash
+docker rm -fv auth-service auth-db
+```
+
+3. Levantar nuevamente `auth-service`.
+
+```bash
+docker compose up -d --build auth-service
+```
+
+4. Verificar que Flyway aplicó migraciones.
+
+```bash
+docker exec auth-db mysql -uroot -proot -D db_auth -e "SELECT installed_rank,version,description,script,success FROM flyway_schema_history ORDER BY installed_rank;"
+```
+
+5. Verificar estado del servicio.
+
+```bash
+curl -i http://localhost:8081/health
 ```
 
 ## Puertos activos
@@ -53,4 +105,3 @@ docker compose ps
 
 - Cada microservicio usa su propia base de datos MySQL.
 - Flyway administra el esquema inicial.
-- `auth-service` queda preparado para Spring Security, JWT y BCrypt.

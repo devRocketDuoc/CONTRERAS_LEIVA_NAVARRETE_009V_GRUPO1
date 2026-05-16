@@ -1,5 +1,4 @@
-package cl.duoc.airflytrip.notifications.security;
-
+package cl.duoc.airflytrip.reservations.security;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 

@@ -13,7 +13,7 @@ Ejemplo con `auth-service`:
 cd ~/Desktop/proyecto-fullstack/air-fly-trip
 
 # Importante: detener el contenedor del microservicio si estaba arriba
-# para evitar conflictos de puerto con VS Code (8081 en auth-service).
+# para evitar conflictos de puerto con VS Code (8082 en auth-service).
 docker compose stop auth-service
 
 # Levantar solo la base de datos del microservicio a probar.
@@ -39,7 +39,7 @@ Notas importantes:
 
 - En modo local, el microservicio corre fuera de Docker.
 - La base de datos puede correr en Docker.
-- La conexión se hace a `localhost:<puerto_externo_db>` (por ejemplo `localhost:3307` en `auth-service`).
+- La conexión se hace a `localhost:<puerto_externo_db>` (por ejemplo `localhost:3308` en `auth-service`).
 - No es necesario levantar todos los microservicios para trabajar en uno solo.
 - Si `auth-service` está arriba en Docker y también ejecutas con `Play` en VS Code, habrá choque de puerto.
 - En Git Bash, usa rutas como `~/Desktop/...` o `/c/Users/...` (no `/mnt/c/...`).
@@ -104,4 +104,4 @@ mvn spring-boot:run
 Debe verse:
 
 - Perfil activo: `local`
-- Host/puerto de DB: `localhost:3307`
+- Host/puerto de DB: `localhost:3308`

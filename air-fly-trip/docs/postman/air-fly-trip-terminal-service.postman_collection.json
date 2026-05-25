@@ -260,11 +260,11 @@
   "variable": [
     {
       "key": "base_url_auth",
-      "value": "http://localhost:8081"
+      "value": "http://localhost:8082"
     },
     {
       "key": "base_url_terminal",
-      "value": "http://localhost:8082"
+      "value": "http://localhost:8083"
     },
     {
       "key": "token",

@@ -1,0 +1,8 @@
+package cl.duoc.airflytrip.auth.exceptions;
+
+public class NotFoundException extends RuntimeException {
+
+    public NotFoundException(String message) {
+        super(message);
+    }
+}

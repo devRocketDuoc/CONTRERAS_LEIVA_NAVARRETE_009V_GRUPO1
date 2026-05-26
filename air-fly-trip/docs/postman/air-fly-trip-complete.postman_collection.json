@@ -1,0 +1,2679 @@
+{
+  "info": {
+    "_postman_id": "c39373c6-2bb2-47b6-b425-a258d80559dd",
+    "name": "air-fly-trip - complete",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "codex",
+    "description": "Coleccion completa de Air-Fly-Trip para pruebas locales.\n\nFlujo recomendado:\n1. Ejecuta `POST /api/v1/auth/login`.\n2. La coleccion guarda `token` y `logged_user_id` automaticamente.\n3. Usa ese token para el resto de endpoints protegidos.\n4. Los `POST`, `PUT`, `PATCH` y `DELETE` del resto de servicios requieren autenticacion.\n\nNotas:\n- `POST /api/v1/auth/register` siempre crea usuarios `CLIENT`.\n- `POST /api/v1/auth/users` permite crear usuarios con rol segun el token del creador.\n- Los IDs semilla por defecto apuntan a los datos iniciales insertados por Flyway."
+  },
+  "item": [
+    {
+      "name": "auth-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_auth}}/health",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/register",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_auth}}/api/v1/auth/register",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"public-user@airflytrip.cl\",\n  \"password\": \"secret123\",\n  \"firstName\": \"Public\",\n  \"lastName\": \"User\",\n  \"documentNumber\": \"11111111-1\",\n  \"phone\": \"+56911111111\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('new_user_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/auth/login",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_auth}}/api/v1/auth/login",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@airflytrip.cl\",\n  \"password\": \"admin123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('token', json.token);",
+                  "if (json.user && json.user.id !== undefined) { pm.collectionVariables.set('logged_user_id', String(json.user.id)); }",
+                  "pm.test('token received', function () {",
+                  "    pm.expect(json.token).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/auth/me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_auth}}/api/v1/auth/me",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/auth/users/{{logged_user_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_auth}}/api/v1/auth/users/{{logged_user_id}}",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "users",
+                "{{logged_user_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/users",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_auth}}/api/v1/auth/users",
+              "host": [
+                "{{base_url_auth}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "users"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"operator-user@airflytrip.cl\",\n  \"password\": \"secret123\",\n  \"firstName\": \"Operator\",\n  \"lastName\": \"User\",\n  \"documentNumber\": \"22222222-2\",\n  \"phone\": \"+56922222222\",\n  \"role\": \"OPERATOR\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('new_user_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "terminal-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_terminal}}/health",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/terminals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/terminals/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals/active",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/terminals/{{terminal_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals/{{terminal_id}}",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals",
+                "{{terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/terminals",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Terminal Norte\",\n  \"city\": \"Antofagasta\",\n  \"locationDescription\": \"Av. Balmaceda 1234\",\n  \"latitude\": -23.6509,\n  \"longitude\": -70.3975,\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('terminal_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/v1/terminals/{{terminal_id}}",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals/{{terminal_id}}",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals",
+                "{{terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Terminal Norte Actualizada\",\n  \"city\": \"Antofagasta\",\n  \"locationDescription\": \"Cerca del centro\",\n  \"latitude\": -23.651,\n  \"longitude\": -70.398,\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('terminal_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/terminals/{{terminal_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_terminal}}/api/v1/terminals/{{terminal_id}}",
+              "host": [
+                "{{base_url_terminal}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terminals",
+                "{{terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "charging-station-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_charging_station}}/health",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/charging-stations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/charging-stations/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/active",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/charging-stations/{{charging_station_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/{{charging_station_id}}",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "{{charging_station_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/charging-stations/terminal/{{terminal_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/terminal/{{terminal_id}}",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "terminal",
+                "{{terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/charging-stations",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CS-ANT-01\",\n  \"name\": \"Estacion de Carga Antofagasta 01\",\n  \"terminalId\": \"{{terminal_id}}\",\n  \"capacity\": 6,\n  \"availableSlots\": 6,\n  \"status\": \"AVAILABLE\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('charging_station_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/v1/charging-stations/{{charging_station_id}}",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/{{charging_station_id}}",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "{{charging_station_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CS-ANT-01\",\n  \"name\": \"Estacion de Carga Antofagasta 01 Actualizada\",\n  \"terminalId\": \"{{terminal_id}}\",\n  \"capacity\": 6,\n  \"availableSlots\": 5,\n  \"status\": \"AVAILABLE\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('charging_station_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/charging-stations/{{charging_station_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/{{charging_station_id}}/status",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "{{charging_station_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{station_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('charging_station_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/charging-stations/{{charging_station_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_charging_station}}/api/v1/charging-stations/{{charging_station_id}}",
+              "host": [
+                "{{base_url_charging_station}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "charging-stations",
+                "{{charging_station_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "vehicle-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/health",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/vehicles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/vehicles/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/active",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/vehicles/available",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/available",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "available"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/vehicles/{{vehicle_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/{{vehicle_id}}",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "{{vehicle_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/vehicles/terminal/{{terminal_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/terminal/{{terminal_id}}",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "terminal",
+                "{{terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/vehicles",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"AFT-VH-010\",\n  \"model\": \"AeroTaxi VTOL D4\",\n  \"status\": \"AVAILABLE\",\n  \"batteryPercentage\": 85,\n  \"terminalId\": \"{{terminal_id}}\",\n  \"chargingStationId\": \"{{charging_station_id}}\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('vehicle_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/v1/vehicles/{{vehicle_id}}",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/{{vehicle_id}}",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "{{vehicle_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"AFT-VH-010\",\n  \"model\": \"AeroTaxi VTOL D4 Updated\",\n  \"status\": \"AVAILABLE\",\n  \"batteryPercentage\": 82,\n  \"terminalId\": \"{{terminal_id}}\",\n  \"chargingStationId\": \"{{charging_station_id}}\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('vehicle_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/vehicles/{{vehicle_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/{{vehicle_id}}/status",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "{{vehicle_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{vehicle_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('vehicle_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/vehicles/{{vehicle_id}}/battery",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/{{vehicle_id}}/battery",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "{{vehicle_id}}",
+                "battery"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batteryPercentage\": 50\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('vehicle_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/vehicles/{{vehicle_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_vehicle}}/api/v1/vehicles/{{vehicle_id}}",
+              "host": [
+                "{{base_url_vehicle}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "vehicles",
+                "{{vehicle_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "route-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_route}}/health",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/routes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/routes/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes/active",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/routes/{{route_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes/{{route_id}}",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "{{route_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/routes/origin/{{origin_terminal_id}}/destination/{{destination_terminal_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes/origin/{{origin_terminal_id}}/destination/{{destination_terminal_id}}",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "origin",
+                "{{origin_terminal_id}}",
+                "destination",
+                "{{destination_terminal_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/routes",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originTerminalId\": \"{{origin_terminal_id}}\",\n  \"destinationTerminalId\": \"{{destination_terminal_id}}\",\n  \"distanceKm\": 2.1,\n  \"estimatedMinutes\": 5,\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('route_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/v1/routes/{{route_id}}",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes/{{route_id}}",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "{{route_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originTerminalId\": \"{{origin_terminal_id}}\",\n  \"destinationTerminalId\": \"{{destination_terminal_id}}\",\n  \"distanceKm\": 2.4,\n  \"estimatedMinutes\": 6,\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('route_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/routes/{{route_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_route}}/api/v1/routes/{{route_id}}",
+              "host": [
+                "{{base_url_route}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "{{route_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "tariff-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/health",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/tariffs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/tariffs/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/active",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/tariffs/{{tariff_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/{{tariff_id}}",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "{{tariff_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/tariffs/route/{{route_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/route/{{route_id}}",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "route",
+                "{{route_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/tariffs/route/{{route_id}}/vehicle-type/{{vehicle_type}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/route/{{route_id}}/vehicle-type/{{vehicle_type}}",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "route",
+                "{{route_id}}",
+                "vehicle-type",
+                "{{vehicle_type}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/tariffs",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routeId\": \"{{route_id}}\",\n  \"basePrice\": 15000.0,\n  \"pricePerKm\": 1800.0,\n  \"vehicleType\": \"{{vehicle_type}}\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('tariff_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/v1/tariffs/{{tariff_id}}",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/{{tariff_id}}",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "{{tariff_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routeId\": \"{{route_id}}\",\n  \"basePrice\": 16000.0,\n  \"pricePerKm\": 1850.0,\n  \"vehicleType\": \"{{vehicle_type}}\",\n  \"active\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('tariff_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/tariffs/{{tariff_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_tariff}}/api/v1/tariffs/{{tariff_id}}",
+              "host": [
+                "{{base_url_tariff}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tariffs",
+                "{{tariff_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "reservation-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_reservation}}/health",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/reservations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/reservations/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations/active",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/reservations/{{reservation_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations/{{reservation_id}}",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations",
+                "{{reservation_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/reservations/user/{{seed_user_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations/user/{{seed_user_id}}",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations",
+                "user",
+                "{{seed_user_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/reservations",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{seed_user_id}}\",\n  \"routeId\": \"{{route_id}}\",\n  \"originTerminalId\": \"{{origin_terminal_id}}\",\n  \"destinationTerminalId\": \"{{destination_terminal_id}}\",\n  \"reservedAt\": \"2027-12-31T15:00:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('reservation_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/reservations/{{reservation_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations/{{reservation_id}}/status",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations",
+                "{{reservation_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{reservation_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('reservation_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/reservations/{{reservation_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_reservation}}/api/v1/reservations/{{reservation_id}}",
+              "host": [
+                "{{base_url_reservation}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reservations",
+                "{{reservation_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "trip-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_trip}}/health",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/trips",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/trips/active",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/active",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "active"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/trips/{{trip_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/{{trip_id}}",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "{{trip_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/trips/user/{{seed_user_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/user/{{seed_user_id}}",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "user",
+                "{{seed_user_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/trips",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{seed_user_id}}\",\n  \"vehicleId\": \"{{vehicle_id}}\",\n  \"originTerminalId\": \"{{origin_terminal_id}}\",\n  \"destinationTerminalId\": \"{{destination_terminal_id}}\",\n  \"routeId\": \"{{route_id}}\",\n  \"scheduledAt\": \"2027-12-31T16:00:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('trip_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/trips/{{trip_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/{{trip_id}}/status",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "{{trip_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{trip_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('trip_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/trips/{{trip_id}}/start",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/{{trip_id}}/start",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "{{trip_id}}",
+                "start"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "PATCH /api/v1/trips/{{trip_id}}/finish",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/{{trip_id}}/finish",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "{{trip_id}}",
+                "finish"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "DELETE /api/v1/trips/{{trip_id}}",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url_trip}}/api/v1/trips/{{trip_id}}",
+              "host": [
+                "{{base_url_trip}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "trips",
+                "{{trip_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "payment-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_payment}}/health",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/payments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/payments/{{payment_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments/{{payment_id}}",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{payment_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/payments/trip/{{trip_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments/trip/{{trip_id}}",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "trip",
+                "{{trip_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/payments/reservation/{{reservation_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments/reservation/{{reservation_id}}",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "reservation",
+                "{{reservation_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/payments",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tripId\": \"{{trip_id}}\",\n  \"amount\": 18780.0,\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"status\": \"PENDING\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('payment_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/payments/{{payment_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_payment}}/api/v1/payments/{{payment_id}}/status",
+              "host": [
+                "{{base_url_payment}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "{{payment_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{payment_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('payment_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "notification-service",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/health",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/v1/notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/notifications/{{notification_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/{{notification_id}}",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notification_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/notifications/user/{{seed_user_id}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/user/{{seed_user_id}}",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "user",
+                "{{seed_user_id}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/notifications/status/{{notification_status}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/status/{{notification_status}}",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "status",
+                "{{notification_status}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "GET /api/v1/notifications/type/{{notification_type}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/type/{{notification_type}}",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "type",
+                "{{notification_type}}"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "POST /api/v1/notifications",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{seed_user_id}}\",\n  \"type\": \"SYSTEM\",\n  \"title\": \"Operational alert\",\n  \"message\": \"There is a pending operational update to review.\",\n  \"status\": \"PENDING\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('notification_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/notifications/{{notification_id}}/status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/{{notification_id}}/status",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notification_id}}",
+                "status"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{notification_update_status}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id !== undefined) { pm.collectionVariables.set('notification_id', String(json.id)); }",
+                  "pm.test('resource id saved', function () {",
+                  "    pm.expect(json.id).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /api/v1/notifications/{{notification_id}}/read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url_notification}}/api/v1/notifications/{{notification_id}}/read",
+              "host": [
+                "{{base_url_notification}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notification_id}}",
+                "read"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url_auth",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "base_url_terminal",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "base_url_vehicle",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "base_url_route",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "base_url_trip",
+      "value": "http://localhost:8086"
+    },
+    {
+      "key": "base_url_reservation",
+      "value": "http://localhost:8087"
+    },
+    {
+      "key": "base_url_tariff",
+      "value": "http://localhost:8088"
+    },
+    {
+      "key": "base_url_payment",
+      "value": "http://localhost:8089"
+    },
+    {
+      "key": "base_url_notification",
+      "value": "http://localhost:8090"
+    },
+    {
+      "key": "base_url_charging_station",
+      "value": "http://localhost:8091"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "logged_user_id",
+      "value": ""
+    },
+    {
+      "key": "new_user_id",
+      "value": ""
+    },
+    {
+      "key": "seed_user_id",
+      "value": "3"
+    },
+    {
+      "key": "terminal_id",
+      "value": "1"
+    },
+    {
+      "key": "charging_station_id",
+      "value": "1"
+    },
+    {
+      "key": "vehicle_id",
+      "value": "1"
+    },
+    {
+      "key": "origin_terminal_id",
+      "value": "1"
+    },
+    {
+      "key": "destination_terminal_id",
+      "value": "2"
+    },
+    {
+      "key": "route_id",
+      "value": "1"
+    },
+    {
+      "key": "tariff_id",
+      "value": "1"
+    },
+    {
+      "key": "reservation_id",
+      "value": "1"
+    },
+    {
+      "key": "trip_id",
+      "value": "1"
+    },
+    {
+      "key": "payment_id",
+      "value": "1"
+    },
+    {
+      "key": "notification_id",
+      "value": "1"
+    },
+    {
+      "key": "vehicle_type",
+      "value": "STANDARD"
+    },
+    {
+      "key": "notification_type",
+      "value": "SYSTEM"
+    },
+    {
+      "key": "notification_status",
+      "value": "PENDING"
+    },
+    {
+      "key": "station_update_status",
+      "value": "MAINTENANCE"
+    },
+    {
+      "key": "vehicle_update_status",
+      "value": "CHARGING"
+    },
+    {
+      "key": "reservation_update_status",
+      "value": "CONFIRMED"
+    },
+    {
+      "key": "trip_update_status",
+      "value": "CONFIRMED"
+    },
+    {
+      "key": "payment_update_status",
+      "value": "APPROVED"
+    },
+    {
+      "key": "notification_update_status",
+      "value": "SENT"
+    }
+  ]
+}

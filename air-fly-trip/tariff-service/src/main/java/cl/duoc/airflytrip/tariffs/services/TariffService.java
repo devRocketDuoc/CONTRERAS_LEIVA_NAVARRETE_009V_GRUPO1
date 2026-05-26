@@ -12,12 +12,14 @@ import cl.duoc.airflytrip.tariffs.models.Tariff;
 import cl.duoc.airflytrip.tariffs.repositories.TariffRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TariffService {
 
@@ -63,7 +65,14 @@ public class TariffService {
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
-        return toResponse(tariffRepository.save(tariff));
+        Tariff savedTariff = tariffRepository.save(tariff);
+        log.info(
+                "event=tariff_created service=tariff-service tariff_id={} route_id={} vehicle_type={}",
+                savedTariff.getId(),
+                savedTariff.getRouteId(),
+                savedTariff.getVehicleType()
+        );
+        return toResponse(savedTariff);
     }
 
     public TariffResponse update(Long id, UpdateTariffRequest request) {
@@ -78,13 +87,16 @@ public class TariffService {
         tariff.setVehicleType(request.getVehicleType());
         tariff.setActive(request.getActive() != null ? request.getActive() : tariff.getActive());
 
-        return toResponse(tariffRepository.save(tariff));
+        Tariff updatedTariff = tariffRepository.save(tariff);
+        log.info("event=tariff_updated service=tariff-service tariff_id={} active={}", id, updatedTariff.getActive());
+        return toResponse(updatedTariff);
     }
 
     public void delete(Long id) {
         Tariff tariff = findTariffById(id);
         tariff.setActive(false);
         tariffRepository.save(tariff);
+        log.info("event=tariff_deleted service=tariff-service tariff_id={}", id);
     }
 
     private Tariff findTariffById(Long id) {

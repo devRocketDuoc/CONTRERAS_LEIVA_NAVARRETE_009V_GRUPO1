@@ -16,12 +16,14 @@ import cl.duoc.airflytrip.reservations.models.Reservation;
 import cl.duoc.airflytrip.reservations.repositories.ReservationRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReservationService {
 
@@ -69,7 +71,14 @@ public class ReservationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(reservationRepository.save(reservation));
+        Reservation savedReservation = reservationRepository.save(reservation);
+        log.info(
+                "event=reservation_created service=reservation-service reservation_id={} user_id={} route_id={}",
+                savedReservation.getId(),
+                savedReservation.getUserId(),
+                savedReservation.getRouteId()
+        );
+        return toResponse(savedReservation);
     }
 
     public ReservationResponse updateStatus(Long id, UpdateReservationStatusRequest request) {
@@ -85,7 +94,9 @@ public class ReservationService {
             reservation.setActive(false);
         }
 
-        return toResponse(reservationRepository.save(reservation));
+        Reservation updatedReservation = reservationRepository.save(reservation);
+        log.info("event=reservation_status_updated service=reservation-service reservation_id={} status={}", id, updatedReservation.getStatus());
+        return toResponse(updatedReservation);
     }
 
     public void delete(Long id) {
@@ -93,6 +104,7 @@ public class ReservationService {
         reservation.setStatus(CANCELLED_STATUS);
         reservation.setActive(false);
         reservationRepository.save(reservation);
+        log.info("event=reservation_deleted service=reservation-service reservation_id={}", id);
     }
 
     private Reservation findReservationById(Long id) {

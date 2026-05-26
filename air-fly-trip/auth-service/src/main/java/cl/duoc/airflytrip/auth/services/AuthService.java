@@ -16,6 +16,7 @@ import cl.duoc.airflytrip.auth.models.UserStatus;
 import cl.duoc.airflytrip.auth.repositories.AppUserRepository;
 import cl.duoc.airflytrip.auth.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -39,6 +41,8 @@ public class AuthService {
         if (appUserRepository.existsByEmail(normalizedEmail)) {
             throw new ConflictException("Email is already registered");
         }
+
+        log.info("event=user_register service=auth-service email={} role=CLIENT", normalizedEmail);
 
         AppUser user = AppUser.builder()
                 .email(normalizedEmail)
@@ -78,6 +82,7 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user);
+        log.info("event=user_login service=auth-service user_id={} email={}", user.getId(), user.getEmail());
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
@@ -120,6 +125,14 @@ public class AuthService {
                 .status(UserStatus.ACTIVE)
                 .enabled(true)
                 .build();
+
+        log.info(
+                "event=user_created service=auth-service creator_id={} creator_role={} user_email={} target_role={}",
+                creator.getId(),
+                creator.getRole(),
+                normalizedEmail,
+                targetRole
+        );
 
         return toResponse(appUserRepository.save(user));
     }

@@ -18,12 +18,14 @@ import cl.duoc.airflytrip.trips.models.Trip;
 import cl.duoc.airflytrip.trips.repositories.TripRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TripService {
 
@@ -78,7 +80,14 @@ public class TripService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(tripRepository.save(trip));
+        Trip savedTrip = tripRepository.save(trip);
+        log.info(
+                "event=trip_created service=trip-service trip_id={} user_id={} route_id={}",
+                savedTrip.getId(),
+                savedTrip.getUserId(),
+                savedTrip.getRouteId()
+        );
+        return toResponse(savedTrip);
     }
 
     public TripResponse updateStatus(Long id, UpdateTripStatusRequest request) {
@@ -91,7 +100,9 @@ public class TripService {
             trip.setActive(false);
         }
 
-        return toResponse(tripRepository.save(trip));
+        Trip updatedTrip = tripRepository.save(trip);
+        log.info("event=trip_status_updated service=trip-service trip_id={} status={}", id, updatedTrip.getStatus());
+        return toResponse(updatedTrip);
     }
 
     public TripResponse startTrip(Long id) {
@@ -104,7 +115,9 @@ public class TripService {
         trip.setStatus(IN_PROGRESS_STATUS);
         trip.setStartedAt(LocalDateTime.now());
 
-        return toResponse(tripRepository.save(trip));
+        Trip startedTrip = tripRepository.save(trip);
+        log.info("event=trip_started service=trip-service trip_id={}", id);
+        return toResponse(startedTrip);
     }
 
     public TripResponse finishTrip(Long id) {
@@ -118,7 +131,9 @@ public class TripService {
         trip.setFinishedAt(LocalDateTime.now());
         trip.setActive(false);
 
-        return toResponse(tripRepository.save(trip));
+        Trip finishedTrip = tripRepository.save(trip);
+        log.info("event=trip_finished service=trip-service trip_id={}", id);
+        return toResponse(finishedTrip);
     }
 
     public void delete(Long id) {
@@ -126,6 +141,7 @@ public class TripService {
         trip.setStatus(CANCELLED_STATUS);
         trip.setActive(false);
         tripRepository.save(trip);
+        log.info("event=trip_deleted service=trip-service trip_id={}", id);
     }
 
     private Trip findTripById(Long id) {

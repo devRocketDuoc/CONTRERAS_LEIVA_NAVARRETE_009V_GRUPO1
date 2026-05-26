@@ -14,6 +14,7 @@ import cl.duoc.airflytrip.payments.models.Payment;
 import cl.duoc.airflytrip.payments.repositories.PaymentRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -73,7 +75,14 @@ public class PaymentService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(paymentRepository.save(payment));
+        Payment savedPayment = paymentRepository.save(payment);
+        log.info(
+                "event=payment_created service=payment-service payment_id={} trip_id={} reservation_id={}",
+                savedPayment.getId(),
+                savedPayment.getTripId(),
+                savedPayment.getReservationId()
+        );
+        return toResponse(savedPayment);
     }
 
     public PaymentResponse updateStatus(Long id, UpdatePaymentStatusRequest request) {
@@ -89,7 +98,9 @@ public class PaymentService {
             payment.setPaidAt(LocalDateTime.now());
         }
 
-        return toResponse(paymentRepository.save(payment));
+        Payment updatedPayment = paymentRepository.save(payment);
+        log.info("event=payment_status_updated service=payment-service payment_id={} status={}", id, updatedPayment.getStatus());
+        return toResponse(updatedPayment);
     }
 
     private Payment findPaymentById(Long id) {

@@ -181,7 +181,7 @@ SELECT
     'Terminal Vespucio Norte',
     'Recoleta',
     'Referencia basada en estación Metro Vespucio Norte, extremo norte de Línea 2',
-    -33.3809000,
+    -33.3809100,
     -70.6463000,
     TRUE
 WHERE NOT EXISTS (

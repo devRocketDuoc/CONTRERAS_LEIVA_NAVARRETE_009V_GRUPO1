@@ -12,12 +12,14 @@ import cl.duoc.airflytrip.notifications.models.Notification;
 import cl.duoc.airflytrip.notifications.repositories.NotificationRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -60,19 +62,30 @@ public class NotificationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return toResponse(notificationRepository.save(notification));
+        Notification savedNotification = notificationRepository.save(notification);
+        log.info(
+                "event=notification_created service=notification-service notification_id={} user_id={} type={}",
+                savedNotification.getId(),
+                savedNotification.getUserId(),
+                savedNotification.getType()
+        );
+        return toResponse(savedNotification);
     }
 
     public NotificationResponse updateStatus(Long id, UpdateNotificationStatusRequest request) {
         Notification notification = findNotificationById(id);
         notification.setStatus(request.getStatus());
-        return toResponse(notificationRepository.save(notification));
+        Notification updatedNotification = notificationRepository.save(notification);
+        log.info("event=notification_status_updated service=notification-service notification_id={} status={}", id, updatedNotification.getStatus());
+        return toResponse(updatedNotification);
     }
 
     public NotificationResponse markAsRead(Long id) {
         Notification notification = findNotificationById(id);
         notification.setStatus(READ_STATUS);
-        return toResponse(notificationRepository.save(notification));
+        Notification updatedNotification = notificationRepository.save(notification);
+        log.info("event=notification_marked_read service=notification-service notification_id={}", id);
+        return toResponse(updatedNotification);
     }
 
     private Notification findNotificationById(Long id) {

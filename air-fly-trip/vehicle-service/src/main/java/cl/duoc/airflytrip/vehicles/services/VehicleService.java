@@ -16,11 +16,13 @@ import cl.duoc.airflytrip.vehicles.models.Vehicle;
 import cl.duoc.airflytrip.vehicles.repositories.VehicleRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class VehicleService {
 
@@ -67,7 +69,14 @@ public class VehicleService {
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
-        return toResponse(vehicleRepository.save(vehicle));
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+        log.info(
+                "event=vehicle_created service=vehicle-service vehicle_id={} terminal_id={} charging_station_id={}",
+                savedVehicle.getId(),
+                savedVehicle.getTerminalId(),
+                savedVehicle.getChargingStationId()
+        );
+        return toResponse(savedVehicle);
     }
 
     public VehicleResponse update(Long id, UpdateVehicleRequest request) {
@@ -85,26 +94,38 @@ public class VehicleService {
         vehicle.setChargingStationId(request.getChargingStationId());
         vehicle.setActive(request.getActive() != null ? request.getActive() : vehicle.getActive());
 
-        return toResponse(vehicleRepository.save(vehicle));
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+        log.info(
+                "event=vehicle_updated service=vehicle-service vehicle_id={} status={} battery={}",
+                updatedVehicle.getId(),
+                updatedVehicle.getStatus(),
+                updatedVehicle.getBatteryPercentage()
+        );
+        return toResponse(updatedVehicle);
     }
 
     public VehicleResponse updateStatus(Long id, UpdateVehicleStatusRequest request) {
         Vehicle vehicle = findVehicleById(id);
         vehicle.setStatus(request.getStatus());
-        return toResponse(vehicleRepository.save(vehicle));
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+        log.info("event=vehicle_status_updated service=vehicle-service vehicle_id={} status={}", id, request.getStatus());
+        return toResponse(updatedVehicle);
     }
 
     public VehicleResponse updateBattery(Long id, UpdateVehicleBatteryRequest request) {
         Vehicle vehicle = findVehicleById(id);
         validateBattery(request.getBatteryPercentage());
         vehicle.setBatteryPercentage(request.getBatteryPercentage());
-        return toResponse(vehicleRepository.save(vehicle));
+        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+        log.info("event=vehicle_battery_updated service=vehicle-service vehicle_id={} battery={}", id, request.getBatteryPercentage());
+        return toResponse(updatedVehicle);
     }
 
     public void delete(Long id) {
         Vehicle vehicle = findVehicleById(id);
         vehicle.setActive(false);
         vehicleRepository.save(vehicle);
+        log.info("event=vehicle_deleted service=vehicle-service vehicle_id={}", id);
     }
 
     private Vehicle findVehicleById(Long id) {

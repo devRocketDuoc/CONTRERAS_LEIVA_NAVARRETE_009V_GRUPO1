@@ -12,11 +12,13 @@ import cl.duoc.airflytrip.routes.models.Route;
 import cl.duoc.airflytrip.routes.repositories.RouteRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class RouteService {
 
@@ -57,7 +59,14 @@ public class RouteService {
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
-        return toResponse(routeRepository.save(route));
+        Route savedRoute = routeRepository.save(route);
+        log.info(
+                "event=route_created service=route-service route_id={} origin_terminal_id={} destination_terminal_id={}",
+                savedRoute.getId(),
+                savedRoute.getOriginTerminalId(),
+                savedRoute.getDestinationTerminalId()
+        );
+        return toResponse(savedRoute);
     }
 
     public RouteResponse update(Long id, UpdateRouteRequest request) {
@@ -72,13 +81,16 @@ public class RouteService {
         route.setEstimatedMinutes(request.getEstimatedMinutes());
         route.setActive(request.getActive() != null ? request.getActive() : route.getActive());
 
-        return toResponse(routeRepository.save(route));
+        Route updatedRoute = routeRepository.save(route);
+        log.info("event=route_updated service=route-service route_id={} active={}", id, updatedRoute.getActive());
+        return toResponse(updatedRoute);
     }
 
     public void delete(Long id) {
         Route route = findRouteById(id);
         route.setActive(false);
         routeRepository.save(route);
+        log.info("event=route_deleted service=route-service route_id={}", id);
     }
 
     private Route findRouteById(Long id) {

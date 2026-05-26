@@ -11,8 +11,10 @@ import cl.duoc.airflytrip.terminals.exceptions.NotFoundException;
 import cl.duoc.airflytrip.terminals.models.Terminal;
 import cl.duoc.airflytrip.terminals.repositories.TerminalRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TerminalService {
 
@@ -48,6 +50,7 @@ public class TerminalService {
                 .build();
 
         Terminal savedTerminal = terminalRepository.save(terminal);
+        log.info("event=terminal_created service=terminal-service terminal_id={} city={}", savedTerminal.getId(), savedTerminal.getCity());
 
         return toResponse(savedTerminal);
     }
@@ -63,6 +66,7 @@ public class TerminalService {
         terminal.setActive(request.getActive() != null ? request.getActive() : terminal.getActive());
 
         Terminal updatedTerminal = terminalRepository.save(terminal);
+        log.info("event=terminal_updated service=terminal-service terminal_id={} active={}", updatedTerminal.getId(), updatedTerminal.getActive());
 
         return toResponse(updatedTerminal);
     }
@@ -71,6 +75,7 @@ public class TerminalService {
         Terminal terminal = findTerminalById(id);
         terminal.setActive(false);
         terminalRepository.save(terminal);
+        log.info("event=terminal_deleted service=terminal-service terminal_id={}", id);
     }
 
     private Terminal findTerminalById(Long id) {

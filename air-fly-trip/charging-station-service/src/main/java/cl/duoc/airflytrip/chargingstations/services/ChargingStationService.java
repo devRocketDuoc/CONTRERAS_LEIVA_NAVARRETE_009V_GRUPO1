@@ -17,8 +17,10 @@ import cl.duoc.airflytrip.chargingstations.models.ChargingStation;
 import cl.duoc.airflytrip.chargingstations.repositories.ChargingStationRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ChargingStationService {
 
@@ -71,6 +73,11 @@ public class ChargingStationService {
                 .build();
 
         ChargingStation savedStation = chargingStationRepository.save(station);
+        log.info(
+                "event=charging_station_created service=charging-station-service charging_station_id={} terminal_id={}",
+                savedStation.getId(),
+                savedStation.getTerminalId()
+        );
 
         return toResponse(savedStation);
     }
@@ -90,6 +97,7 @@ public class ChargingStationService {
         station.setActive(request.getActive() != null ? request.getActive() : station.getActive());
 
         ChargingStation updatedStation = chargingStationRepository.save(station);
+        log.info("event=charging_station_updated service=charging-station-service charging_station_id={} active={}", id, updatedStation.getActive());
 
         return toResponse(updatedStation);
     }
@@ -99,6 +107,7 @@ public class ChargingStationService {
         station.setStatus(request.getStatus());
 
         ChargingStation updatedStation = chargingStationRepository.save(station);
+        log.info("event=charging_station_status_updated service=charging-station-service charging_station_id={} status={}", id, updatedStation.getStatus());
 
         return toResponse(updatedStation);
     }
@@ -107,6 +116,7 @@ public class ChargingStationService {
         ChargingStation station = findChargingStationById(id);
         station.setActive(false);
         chargingStationRepository.save(station);
+        log.info("event=charging_station_deleted service=charging-station-service charging_station_id={}", id);
     }
 
     private ChargingStation findChargingStationById(Long id) {

@@ -1,11 +1,7 @@
 package cl.duoc.airflytrip.routes.controllers;
 
-import cl.duoc.airflytrip.routes.dtos.request.CreateRouteRequest;
-import cl.duoc.airflytrip.routes.dtos.request.UpdateRouteRequest;
-import cl.duoc.airflytrip.routes.dtos.response.RouteResponse;
-import cl.duoc.airflytrip.routes.services.RouteService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,15 +14,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import cl.duoc.airflytrip.routes.dtos.request.CreateRouteRequest;
+import cl.duoc.airflytrip.routes.dtos.request.UpdateRouteRequest;
+import cl.duoc.airflytrip.routes.dtos.response.RouteResponse;
+import cl.duoc.airflytrip.routes.services.RouteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/routes")
+@Tag(name = "Rutas", description = "Operaciones relacionadas con la ruta")
 @RequiredArgsConstructor
 public class RouteController {
 
     private final RouteService routeService;
-
+    @Operation(summary = "Obtener todos las rutas", description="Obtiene una lista de todas las rutas")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200", description = "Exito"),
+        @ApiResponse( responseCode = "404", description = "Sin las rutas")
+    })
     @GetMapping
     public ResponseEntity<List<RouteResponse>> findAll() {
         return ResponseEntity.ok(routeService.findAll());
@@ -36,6 +46,8 @@ public class RouteController {
     public ResponseEntity<List<RouteResponse>> findActive() {
         return ResponseEntity.ok(routeService.findActive());
     }
+
+    @Operation(summary = "Obtener la ruta por id", description="Obtiene una ruta por id")
 
     @GetMapping("/{id}")
     public ResponseEntity<RouteResponse> findById(@PathVariable Long id) {

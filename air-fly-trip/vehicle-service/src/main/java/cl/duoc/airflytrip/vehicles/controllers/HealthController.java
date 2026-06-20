@@ -1,12 +1,33 @@
 package cl.duoc.airflytrip.vehicles.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(
+        name = "Monitoreo del servicio",
+        description = "Operacion simple para verificar que el microservicio de vehiculos se encuentra disponible."
+)
 public class HealthController {
 
     @GetMapping("/health")
+    @Operation(
+            summary = "Consultar estado del servicio",
+            description = "Retorna un mensaje simple para confirmar que vehicle-service se encuentra operativo."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Servicio operativo",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class, example = "vehicle-service is running"))
+            )
+    })
     public String health() {
         return "vehicle-service is running";
     }

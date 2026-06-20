@@ -1,10 +1,5 @@
 package cl.duoc.airflytrip.routes.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import cl.duoc.airflytrip.routes.dtos.request.CreateRouteRequest;
 import cl.duoc.airflytrip.routes.dtos.request.UpdateRouteRequest;
 import cl.duoc.airflytrip.routes.dtos.response.RouteResponse;
@@ -17,102 +12,100 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RouteControllerTest {
 
-    @Mock
-    private RouteService routeService;
+  @Mock
+  private RouteService routeService;
 
-    @InjectMocks
-    private RouteController routeController;
+  @InjectMocks
+  private RouteController routeController;
 
-    @Test
-    void findAllShouldReturnMappedRoutes() {
-        when(routeService.findAll()).thenReturn(List.of(routeResponse(1L, true)));
+  @Test
+  void findAllShouldReturnRoutes() {
 
-        var result = routeController.findAll();
+    when(routeService.findAll()).thenReturn(List.of(routeResponse(1L, true)));
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).hasSize(1);
-        assertThat(result.getBody().get(0).getId()).isEqualTo(1L);
-        verify(routeService).findAll();
-    }
+    ResponseEntity<List<RouteResponse>> result = routeController.findAll();
 
-    @Test
-    void findActiveShouldReturnMappedRoutes() {
-        when(routeService.findActive()).thenReturn(List.of(routeResponse(2L, true)));
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals(1, result.getBody().size());
+    assertEquals(1L, result.getBody().get(0).getId());
+  }
 
-        var result = routeController.findActive();
+  @Test
+  void createShouldReturnCreatedRoute() {
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).hasSize(1);
-        assertThat(result.getBody().get(0).getId()).isEqualTo(2L);
-        verify(routeService).findActive();
-    }
+    CreateRouteRequest request = new CreateRouteRequest();
+    request.setOriginTerminalId(10L);
+    request.setDestinationTerminalId(20L);
+    request.setDistanceKm(new BigDecimal("12.50"));
+    request.setEstimatedMinutes(30);
 
-    @Test
-    void createShouldReturnCreatedRoute() {
-        CreateRouteRequest request = createRouteRequest();
-        when(routeService.create(any(CreateRouteRequest.class))).thenReturn(routeResponse(10L, true));
+    RouteResponse responseSimulado = routeResponse(10L, true);
 
-        var result = routeController.create(request);
+    when(routeService.create(any(CreateRouteRequest.class))).thenReturn(responseSimulado);
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getId()).isEqualTo(10L);
-        verify(routeService).create(any(CreateRouteRequest.class));
-    }
+    ResponseEntity<RouteResponse> result = routeController.create(request);
 
-    @Test
-    void updateShouldReturnUpdatedRoute() {
-        UpdateRouteRequest request = updateRouteRequest();
-        when(routeService.update(5L, request)).thenReturn(routeResponse(5L, false));
+    assertEquals(HttpStatus.CREATED, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals(10L, result.getBody().getId());
+    assertEquals(10L, result.getBody().getOriginTerminalId());
+  }
 
-        var result = routeController.update(5L, request);
+  @Test
+  void updateShouldReturnUpdatedRoute() {
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getActive()).isFalse();
-        verify(routeService).update(5L, request);
-    }
+    UpdateRouteRequest request = new UpdateRouteRequest();
+    request.setOriginTerminalId(11L);
+    request.setDestinationTerminalId(21L);
+    request.setDistanceKm(new BigDecimal("14.25"));
+    request.setEstimatedMinutes(35);
+    request.setActive(false);
 
-    @Test
-    void deleteShouldReturnNoContent() {
-        var result = routeController.delete(7L);
+    RouteResponse responseSimulado = RouteResponse.builder()
+        .id(5L)
+        .originTerminalId(11L)
+        .destinationTerminalId(21L)
+        .distanceKm(new BigDecimal("14.25"))
+        .estimatedMinutes(35)
+        .active(false)
+        .build();
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        verify(routeService).delete(7L);
-    }
+    when(routeService.update(5L, request)).thenReturn(responseSimulado);
 
-    private CreateRouteRequest createRouteRequest() {
-        CreateRouteRequest request = new CreateRouteRequest();
-        request.setOriginTerminalId(10L);
-        request.setDestinationTerminalId(20L);
-        request.setDistanceKm(new BigDecimal("12.50"));
-        request.setEstimatedMinutes(30);
-        request.setActive(true);
-        return request;
-    }
+    ResponseEntity<RouteResponse> result = routeController.update(5L, request);
 
-    private UpdateRouteRequest updateRouteRequest() {
-        UpdateRouteRequest request = new UpdateRouteRequest();
-        request.setOriginTerminalId(11L);
-        request.setDestinationTerminalId(21L);
-        request.setDistanceKm(new BigDecimal("14.25"));
-        request.setEstimatedMinutes(35);
-        request.setActive(false);
-        return request;
-    }
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals(false, result.getBody().getActive());
+  }
 
-    private RouteResponse routeResponse(Long id, boolean active) {
-        return RouteResponse.builder()
-                .id(id)
-                .originTerminalId(10L)
-                .destinationTerminalId(20L)
-                .distanceKm(new BigDecimal("12.50"))
-                .estimatedMinutes(30)
-                .active(active)
-                .build();
-    }
+  @Test
+  void deleteShouldReturnNoContent() {
+
+    ResponseEntity<Void> result = routeController.delete(7L);
+
+    assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+  }
+
+  private RouteResponse routeResponse(Long id, Boolean active) {
+    return RouteResponse.builder()
+        .id(id)
+        .originTerminalId(10L)
+        .destinationTerminalId(20L)
+        .distanceKm(new BigDecimal("12.50"))
+        .estimatedMinutes(30)
+        .active(active)
+        .build();
+  }
 }

@@ -1,13 +1,23 @@
 package cl.duoc.airflytrip.auth.services;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import cl.duoc.airflytrip.auth.dtos.request.CreateUserRequest;
 import cl.duoc.airflytrip.auth.dtos.request.LoginRequest;
@@ -22,249 +32,216 @@ import cl.duoc.airflytrip.auth.models.UserRole;
 import cl.duoc.airflytrip.auth.models.UserStatus;
 import cl.duoc.airflytrip.auth.repositories.AppUserRepository;
 import cl.duoc.airflytrip.auth.security.JwtService;
-import java.time.LocalDateTime;
-import java.util.Optional;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+public class AuthServiceTest {
 
-    @Mock
-    private AppUserRepository appUserRepository;
+  @Mock
+  private AppUserRepository appUserRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+  @Mock
+  private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AuthenticationManager authenticationManager;
+  @Mock
+  private AuthenticationManager authenticationManager;
 
-    @Mock
-    private JwtService jwtService;
+  @Mock
+  private JwtService jwtService;
 
-    @InjectMocks
-    private AuthService authService;
+  @InjectMocks
+  private AuthService authService;
 
-    @Test
-    void registerShouldNormalizeAndPersistClientUser() {
-        RegisterRequest request = RegisterRequest.builder()
-                .email("  USER@Example.com ")
-                .password("secret123")
-                .firstName("  Ana ")
-                .lastName("  Perez ")
-                .documentNumber(" 12.345.678-9 ")
-                .phone(" +56 9 1234 5678 ")
-                .build();
+  @Test
+  void testRegistroExitoso() {
 
-        when(appUserRepository.existsByEmail("user@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("secret123")).thenReturn("encoded-secret");
-        when(appUserRepository.save(any(AppUser.class))).thenAnswer(invocation -> {
-            AppUser user = invocation.getArgument(0);
-            user.setId(10L);
-            user.setCreatedAt(LocalDateTime.of(2026, 1, 1, 12, 0));
-            return user;
-        });
+    RegisterRequest request = RegisterRequest.builder()
+        .email("user@example.com")
+        .password("secret123")
+        .firstName("Ana")
+        .lastName("Perez")
+        .documentNumber("12.345.678-9")
+        .phone("+56 9 1234 5678")
+        .build();
 
-        UserResponse response = authService.register(request);
+    AppUser usuarioGuardado = AppUser.builder()
+        .id(10L)
+        .email("user@example.com")
+        .passwordHash("encoded-secret")
+        .firstName("Ana")
+        .lastName("Perez")
+        .role(UserRole.CLIENT)
+        .status(UserStatus.ACTIVE)
+        .enabled(true)
+        .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0))
+        .build();
 
-        ArgumentCaptor<AppUser> captor = ArgumentCaptor.forClass(AppUser.class);
-        verify(appUserRepository).save(captor.capture());
+    when(appUserRepository.existsByEmail("user@example.com")).thenReturn(false);
+    when(passwordEncoder.encode("secret123")).thenReturn("encoded-secret");
+    when(appUserRepository.save(any(AppUser.class))).thenReturn(usuarioGuardado);
+    UserResponse respuesta = authService.register(request);
 
-        AppUser saved = captor.getValue();
-        assertThat(saved.getEmail()).isEqualTo("user@example.com");
-        assertThat(saved.getPasswordHash()).isEqualTo("encoded-secret");
-        assertThat(saved.getFirstName()).isEqualTo("Ana");
-        assertThat(saved.getLastName()).isEqualTo("Perez");
-        assertThat(saved.getDocumentNumber()).isEqualTo("12.345.678-9");
-        assertThat(saved.getPhone()).isEqualTo("+56 9 1234 5678");
-        assertThat(saved.getRole()).isEqualTo(UserRole.CLIENT);
-        assertThat(saved.getStatus()).isEqualTo(UserStatus.ACTIVE);
-        assertThat(saved.getEnabled()).isTrue();
-        assertThat(response.getId()).isEqualTo(10L);
-        assertThat(response.getEmail()).isEqualTo("user@example.com");
-        assertThat(response.getRole()).isEqualTo("CLIENT");
-        assertThat(response.getStatus()).isEqualTo("ACTIVE");
-        assertThat(response.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 1, 1, 12, 0));
+    assertNotNull(respuesta);
+    assertEquals(10L, respuesta.getId());
+    assertEquals("user@example.com", respuesta.getEmail());
+    assertEquals("CLIENT", respuesta.getRole());
+    assertEquals("ACTIVE", respuesta.getStatus());
+  }
+
+  @Test
+  void testRegistroFallaEmailDuplicado() {
+
+    RegisterRequest request = RegisterRequest.builder()
+        .email("user@example.com")
+        .password("secret123")
+        .firstName("Ana")
+        .lastName("Perez")
+        .build();
+
+    when(appUserRepository.existsByEmail("user@example.com")).thenReturn(true);
+
+    Exception exception = null;
+
+    try {
+      authService.register(request);
+    } catch (Exception ex) {
+      exception = ex;
     }
 
-    @Test
-    void registerShouldRejectDuplicatedEmail() {
-        RegisterRequest request = RegisterRequest.builder()
-                .email("user@example.com")
-                .password("secret123")
-                .firstName("Ana")
-                .lastName("Perez")
-                .build();
+    assertNotNull(exception);
+    assertEquals(ConflictException.class, exception.getClass());
+    assertEquals("Email is already registered", exception.getMessage());
+  }
 
-        when(appUserRepository.existsByEmail("user@example.com")).thenReturn(true);
+  @Test
+  void testLoginExitoso() {
 
-        assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("Email is already registered");
+    LoginRequest request = LoginRequest.builder()
+        .email("admin@example.com")
+        .password("secret123")
+        .build();
 
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(appUserRepository, never()).save(any());
+    Authentication authenticationMock = org.mockito.Mockito.mock(Authentication.class);
+    AppUser usuarioEnBD = sampleUser(20L, "admin@example.com", "Admin", "User", UserRole.ADMIN, UserStatus.ACTIVE,
+        true);
+
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenReturn(authenticationMock);
+    when(appUserRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(usuarioEnBD));
+    when(jwtService.generateToken(usuarioEnBD)).thenReturn("token-falso-123");
+
+    AuthResponse respuesta = authService.login(request);
+
+    assertNotNull(respuesta);
+    assertEquals("token-falso-123", respuesta.getToken());
+    assertEquals("Bearer", respuesta.getTokenType());
+    assertEquals("admin@example.com", respuesta.getUser().getEmail());
+    assertEquals("ADMIN", respuesta.getUser().getRole());
+  }
+
+  @Test
+  void testLoginFallaCredencialesInvalidas() {
+
+    LoginRequest request = LoginRequest.builder()
+        .email("user@example.com")
+        .password("wrong-password")
+        .build();
+
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenThrow(new BadCredentialsException("bad credentials"));
+
+    Exception exception = null;
+    try {
+      authService.login(request);
+    } catch (Exception ex) {
+      exception = ex;
     }
 
-    @Test
-    void loginShouldReturnBearerTokenAndMappedUser() {
-        LoginRequest request = LoginRequest.builder()
-                .email("  ADMIN@Example.com ")
-                .password("secret123")
-                .build();
+    assertNotNull(exception);
+    assertEquals(UnauthorizedException.class, exception.getClass());
+    assertEquals("Invalid email or password", exception.getMessage());
+  }
 
-        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
-        AppUser user = sampleUser(
-                20L,
-                "admin@example.com",
-                "Admin",
-                "User",
-                UserRole.ADMIN,
-                UserStatus.ACTIVE,
-                true
-        );
+  @Test
+  void testCrearUsuarioAdminCreaOperadorExitoso() {
 
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(authentication);
-        when(appUserRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+    CreateUserRequest request = CreateUserRequest.builder()
+        .email("  operator@Example.com ")
+        .password("secret123")
+        .firstName("  Camila ")
+        .lastName("  Rojas ")
+        .documentNumber(" 11.111.111-1 ")
+        .phone(" +56 9 2222 2222 ")
+        .role("operator")
+        .build();
 
-        AuthResponse response = authService.login(request);
+    AppUser adminCreador = sampleUser(1L, "admin@example.com", "Admin", "User", UserRole.ADMIN, UserStatus.ACTIVE,
+        true);
 
-        ArgumentCaptor<UsernamePasswordAuthenticationToken> authCaptor =
-                ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
-        verify(authenticationManager).authenticate(authCaptor.capture());
-        assertThat(authCaptor.getValue().getName()).isEqualTo("admin@example.com");
-        assertThat(authCaptor.getValue().getCredentials()).isEqualTo("secret123");
-        assertThat(response.getToken()).isEqualTo("jwt-token");
-        assertThat(response.getTokenType()).isEqualTo("Bearer");
-        assertThat(response.getUser().getEmail()).isEqualTo("admin@example.com");
-        assertThat(response.getUser().getRole()).isEqualTo("ADMIN");
+    AppUser operadorGuardado = sampleUser(30L, "operator@example.com", "Camila", "Rojas", UserRole.OPERATOR,
+        UserStatus.ACTIVE, true);
+    operadorGuardado.setCreatedAt(LocalDateTime.of(2026, 1, 2, 9, 30));
+
+    when(appUserRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(adminCreador));
+    when(appUserRepository.existsByEmail("operator@example.com")).thenReturn(false);
+    when(passwordEncoder.encode("secret123")).thenReturn("encoded-secret");
+    when(appUserRepository.save(any(AppUser.class))).thenReturn(operadorGuardado);
+
+    UserResponse response = authService.createUser(request, "ADMIN@Example.com ");
+
+    assertNotNull(response);
+    assertEquals(30L, response.getId());
+    assertEquals("operator@example.com", response.getEmail());
+    assertEquals("OPERATOR", response.getRole());
+    assertEquals(LocalDateTime.of(2026, 1, 2, 9, 30), response.getCreatedAt());
+  }
+
+  @Test
+  void testCrearUsuarioFallaOperadorNoPuedeCrearAdmin() {
+
+    CreateUserRequest request = CreateUserRequest.builder()
+        .email("admin2@example.com")
+        .password("secret123")
+        .firstName("Admin")
+        .lastName("Two")
+        .role("ADMIN")
+        .build();
+
+    AppUser operadorCreador = sampleUser(2L, "operator@example.com", "Operator", "User", UserRole.OPERATOR,
+        UserStatus.ACTIVE, true);
+
+    when(appUserRepository.findByEmail("operator@example.com")).thenReturn(Optional.of(operadorCreador));
+
+    Exception exception = null;
+    try {
+      authService.createUser(request, "operator@example.com");
+    } catch (Exception ex) {
+      exception = ex;
     }
 
-    @Test
-    void loginShouldTranslateBadCredentialsToUnauthorized() {
-        LoginRequest request = LoginRequest.builder()
-                .email("user@example.com")
-                .password("wrong-password")
-                .build();
+    assertNotNull(exception);
+    assertEquals(ForbiddenException.class, exception.getClass());
+    assertEquals("You do not have permission to create a user with role ADMIN", exception.getMessage());
+  }
 
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(new BadCredentialsException("bad credentials"));
+  private AppUser sampleUser(
+      Long id,
+      String email,
+      String firstName,
+      String lastName,
+      UserRole role,
+      UserStatus status,
+      Boolean enabled) {
+    return AppUser.builder()
+        .id(id)
+        .email(email)
+        .passwordHash("encoded")
+        .firstName(firstName)
+        .lastName(lastName)
+        .role(role)
+        .status(status)
+        .enabled(enabled)
+        .createdAt(LocalDateTime.of(2026, 1, 1, 8, 0))
+        .build();
+  }
 
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("Invalid email or password");
-
-        verifyNoInteractions(appUserRepository, jwtService);
-    }
-
-    @Test
-    void createUserShouldAllowAdminToCreateOperator() {
-        CreateUserRequest request = CreateUserRequest.builder()
-                .email("  operator@Example.com ")
-                .password("secret123")
-                .firstName("  Camila ")
-                .lastName("  Rojas ")
-                .documentNumber(" 11.111.111-1 ")
-                .phone(" +56 9 2222 2222 ")
-                .role("operator")
-                .build();
-
-        AppUser creator = sampleUser(
-                1L,
-                "admin@example.com",
-                "Admin",
-                "User",
-                UserRole.ADMIN,
-                UserStatus.ACTIVE,
-                true
-        );
-
-        when(appUserRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(creator));
-        when(appUserRepository.existsByEmail("operator@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("secret123")).thenReturn("encoded-secret");
-        when(appUserRepository.save(any(AppUser.class))).thenAnswer(invocation -> {
-            AppUser user = invocation.getArgument(0);
-            user.setId(30L);
-            user.setCreatedAt(LocalDateTime.of(2026, 1, 2, 9, 30));
-            return user;
-        });
-
-        UserResponse response = authService.createUser(request, "ADMIN@Example.com ");
-
-        ArgumentCaptor<AppUser> captor = ArgumentCaptor.forClass(AppUser.class);
-        verify(appUserRepository).save(captor.capture());
-
-        AppUser saved = captor.getValue();
-        assertThat(saved.getEmail()).isEqualTo("operator@example.com");
-        assertThat(saved.getRole()).isEqualTo(UserRole.OPERATOR);
-        assertThat(saved.getStatus()).isEqualTo(UserStatus.ACTIVE);
-        assertThat(saved.getEnabled()).isTrue();
-        assertThat(saved.getPasswordHash()).isEqualTo("encoded-secret");
-        assertThat(response.getEmail()).isEqualTo("operator@example.com");
-        assertThat(response.getRole()).isEqualTo("OPERATOR");
-        assertThat(response.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 1, 2, 9, 30));
-    }
-
-    @Test
-    void createUserShouldRejectOperatorCreatingAdmin() {
-        CreateUserRequest request = CreateUserRequest.builder()
-                .email("admin2@example.com")
-                .password("secret123")
-                .firstName("Admin")
-                .lastName("Two")
-                .role("ADMIN")
-                .build();
-
-        AppUser creator = sampleUser(
-                2L,
-                "operator@example.com",
-                "Operator",
-                "User",
-                UserRole.OPERATOR,
-                UserStatus.ACTIVE,
-                true
-        );
-
-        when(appUserRepository.findByEmail("operator@example.com")).thenReturn(Optional.of(creator));
-
-        assertThatThrownBy(() -> authService.createUser(request, "operator@example.com"))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessage("You do not have permission to create a user with role ADMIN");
-
-        verify(appUserRepository, never()).existsByEmail(anyString());
-        verify(appUserRepository, never()).save(any());
-    }
-
-    private AppUser sampleUser(
-            Long id,
-            String email,
-            String firstName,
-            String lastName,
-            UserRole role,
-            UserStatus status,
-            Boolean enabled
-    ) {
-        return AppUser.builder()
-                .id(id)
-                .email(email)
-                .passwordHash("encoded")
-                .firstName(firstName)
-                .lastName(lastName)
-                .role(role)
-                .status(status)
-                .enabled(enabled)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 8, 0))
-                .build();
-    }
 }

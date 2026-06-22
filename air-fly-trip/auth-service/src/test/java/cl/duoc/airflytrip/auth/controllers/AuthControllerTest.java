@@ -1,11 +1,5 @@
 package cl.duoc.airflytrip.auth.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import cl.duoc.airflytrip.auth.dtos.request.CreateUserRequest;
 import cl.duoc.airflytrip.auth.dtos.request.LoginRequest;
 import cl.duoc.airflytrip.auth.dtos.request.RegisterRequest;
@@ -19,108 +13,123 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
-    @Mock
-    private AuthService authService;
+  @Mock
+  private AuthService authService;
 
-    @InjectMocks
-    private AuthController authController;
+  @InjectMocks
+  private AuthController authController;
 
-    @Test
-    void registerShouldReturnCreatedUser() {
-        RegisterRequest request = RegisterRequest.builder()
-                .email("user@example.com")
-                .password("secret123")
-                .firstName("Ana")
-                .lastName("Perez")
-                .build();
-        UserResponse response = userResponse(1L, "user@example.com");
+  @Test
+  void registerShouldReturnCreatedUser() {
 
-        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
+    RegisterRequest request = RegisterRequest.builder()
+        .email("user@example.com")
+        .password("secret123")
+        .firstName("Ana")
+        .lastName("Perez")
+        .build();
 
-        var result = authController.register(request);
+    UserResponse responseSimulado = userResponse(1L, "user@example.com");
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getEmail()).isEqualTo("user@example.com");
-        verify(authService).register(any(RegisterRequest.class));
-    }
+    when(authService.register(any(RegisterRequest.class))).thenReturn(responseSimulado);
 
-    @Test
-    void loginShouldReturnToken() {
-        LoginRequest request = LoginRequest.builder()
-                .email("user@example.com")
-                .password("secret123")
-                .build();
-        AuthResponse response = AuthResponse.builder()
-                .token("jwt-token")
-                .tokenType("Bearer")
-                .user(userResponse(1L, "user@example.com"))
-                .build();
+    ResponseEntity<UserResponse> result = authController.register(request);
 
-        when(authService.login(any(LoginRequest.class))).thenReturn(response);
+    assertEquals(HttpStatus.CREATED, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals("user@example.com", result.getBody().getEmail());
+  }
 
-        var result = authController.login(request);
+  @Test
+  void loginShouldReturnToken() {
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getToken()).isEqualTo("jwt-token");
-        assertThat(result.getBody().getTokenType()).isEqualTo("Bearer");
-    }
+    LoginRequest request = LoginRequest.builder()
+        .email("user@example.com")
+        .password("secret123")
+        .build();
 
-    @Test
-    void meShouldResolveAuthenticatedPrincipal() {
-        UserResponse response = userResponse(2L, "me@example.com");
-        UserDetails userDetails = org.mockito.Mockito.mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("me@example.com");
-        when(authService.getCurrentUser("me@example.com")).thenReturn(response);
+    AuthResponse responseSimulado = AuthResponse.builder()
+        .token("jwt-token")
+        .tokenType("Bearer")
+        .user(userResponse(1L, "user@example.com"))
+        .build();
 
-        var result = authController.getCurrentUser(userDetails);
+    when(authService.login(any(LoginRequest.class))).thenReturn(responseSimulado);
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getEmail()).isEqualTo("me@example.com");
-        verify(authService).getCurrentUser("me@example.com");
-    }
+    ResponseEntity<AuthResponse> result = authController.login(request);
 
-    @Test
-    void createUserShouldUseAuthenticatedPrincipal() {
-        CreateUserRequest request = CreateUserRequest.builder()
-                .email("new-user@example.com")
-                .password("secret123")
-                .firstName("New")
-                .lastName("User")
-                .role("CLIENT")
-                .build();
-        UserResponse response = userResponse(3L, "new-user@example.com");
-        UserDetails userDetails = org.mockito.Mockito.mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("admin@example.com");
-        when(authService.createUser(any(CreateUserRequest.class), eq("admin@example.com"))).thenReturn(response);
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals("jwt-token", result.getBody().getToken());
+    assertEquals("Bearer", result.getBody().getTokenType());
+  }
 
-        var result = authController.createUser(request, userDetails);
+  @Test
+  void meShouldResolveAuthenticatedPrincipal() {
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getEmail()).isEqualTo("new-user@example.com");
-        verify(authService).createUser(any(CreateUserRequest.class), eq("admin@example.com"));
-    }
+    UserResponse responseSimulado = userResponse(2L, "me@example.com");
 
-    private UserResponse userResponse(Long id, String email) {
-        return UserResponse.builder()
-                .id(id)
-                .email(email)
-                .firstName("Ana")
-                .lastName("Perez")
-                .documentNumber("12345678-9")
-                .phone("+56 9 1234 5678")
-                .role("CLIENT")
-                .status("ACTIVE")
-                .enabled(true)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0))
-                .build();
-    }
+    @SuppressWarnings("all")
+    UserDetails userDetailsMock = org.mockito.Mockito.mock(UserDetails.class);
+    when(userDetailsMock.getUsername()).thenReturn("me@example.com");
+    when(authService.getCurrentUser("me@example.com")).thenReturn(responseSimulado);
+
+    ResponseEntity<UserResponse> result = authController.getCurrentUser(userDetailsMock);
+
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals("me@example.com", result.getBody().getEmail());
+  }
+
+  @Test
+  void createUserShouldUseAuthenticatedPrincipal() {
+
+    CreateUserRequest request = CreateUserRequest.builder()
+        .email("new-user@example.com")
+        .password("secret123")
+        .firstName("New")
+        .lastName("User")
+        .role("CLIENT")
+        .build();
+
+    UserResponse responseSimulado = userResponse(3L, "new-user@example.com");
+
+    @SuppressWarnings("all")
+    UserDetails userDetailsMock = org.mockito.Mockito.mock(UserDetails.class);
+    when(userDetailsMock.getUsername()).thenReturn("admin@example.com");
+    when(authService.createUser(any(CreateUserRequest.class), eq("admin@example.com"))).thenReturn(responseSimulado);
+
+    ResponseEntity<UserResponse> result = authController.createUser(request, userDetailsMock);
+
+    assertEquals(HttpStatus.CREATED, result.getStatusCode());
+    assertNotNull(result.getBody());
+    assertEquals("new-user@example.com", result.getBody().getEmail());
+  }
+
+  private UserResponse userResponse(Long id, String email) {
+    return UserResponse.builder()
+        .id(id)
+        .email(email)
+        .firstName("Ana")
+        .lastName("Perez")
+        .documentNumber("12345678-9")
+        .phone("+56 9 1234 5678")
+        .role("CLIENT")
+        .status("ACTIVE")
+        .enabled(true)
+        .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0))
+        .build();
+  }
 }

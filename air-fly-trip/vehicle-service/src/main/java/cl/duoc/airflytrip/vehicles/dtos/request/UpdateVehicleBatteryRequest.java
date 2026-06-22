@@ -1,5 +1,6 @@
 package cl.duoc.airflytrip.vehicles.dtos.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -8,10 +9,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Schema(description = "Datos requeridos para actualizar el porcentaje de bateria de un vehiculo.")
 public class UpdateVehicleBatteryRequest {
 
     @NotNull(message = "Battery percentage is required")
     @Min(value = 0, message = "Battery percentage must be greater than or equal to 0")
     @Max(value = 100, message = "Battery percentage must be less than or equal to 100")
+    @Schema(description = "Nuevo porcentaje de bateria del vehiculo.", example = "58")
     private Integer batteryPercentage;
 }

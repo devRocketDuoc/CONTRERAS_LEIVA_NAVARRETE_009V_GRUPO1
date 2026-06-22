@@ -2,6 +2,13 @@ services:
   auth-db:
     image: mysql:8.4
     container_name: auth-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_auth
@@ -9,15 +16,23 @@ services:
       - "3308:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   terminal-db:
     image: mysql:8.4
     container_name: terminal-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_terminals
@@ -25,15 +40,23 @@ services:
       - "3309:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   vehicle-db:
     image: mysql:8.4
     container_name: vehicle-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_vehicles
@@ -41,15 +64,23 @@ services:
       - "3310:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   route-db:
     image: mysql:8.4
     container_name: route-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_routes
@@ -57,15 +88,23 @@ services:
       - "3311:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   trip-db:
     image: mysql:8.4
     container_name: trip-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_trips
@@ -73,15 +112,23 @@ services:
       - "3312:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   reservation-db:
     image: mysql:8.4
     container_name: reservation-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_reservations
@@ -89,15 +136,23 @@ services:
       - "3313:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   tariff-db:
     image: mysql:8.4
     container_name: tariff-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_tariffs
@@ -105,15 +160,23 @@ services:
       - "3314:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   payment-db:
     image: mysql:8.4
     container_name: payment-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_payments
@@ -121,15 +184,23 @@ services:
       - "3315:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   notification-db:
     image: mysql:8.4
     container_name: notification-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_notifications
@@ -137,15 +208,23 @@ services:
       - "3316:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
     networks:
       - airflytrip-network
 
   charging-station-db:
     image: mysql:8.4
     container_name: charging-station-db
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --max-connections=40
+      - --table-open-cache=128
+      - --performance-schema=OFF
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: db_charging_stations
@@ -153,9 +232,18 @@ services:
       - "3317:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
+      start_period: 40s
+    networks:
+      - airflytrip-network
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
     networks:
       - airflytrip-network
 
@@ -167,6 +255,8 @@ services:
     depends_on:
       auth-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -181,6 +271,8 @@ services:
     depends_on:
       terminal-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -195,6 +287,8 @@ services:
     depends_on:
       vehicle-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -209,6 +303,8 @@ services:
     depends_on:
       route-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -223,6 +319,8 @@ services:
     depends_on:
       trip-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -237,6 +335,8 @@ services:
     depends_on:
       reservation-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -251,6 +351,8 @@ services:
     depends_on:
       tariff-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -265,6 +367,8 @@ services:
     depends_on:
       payment-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -279,6 +383,8 @@ services:
     depends_on:
       notification-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
@@ -293,9 +399,24 @@ services:
     depends_on:
       charging-station-db:
         condition: service_healthy
+      eureka-server:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       APP_JWT_SECRET: ${APP_JWT_SECRET:-airflytrip-2026-jwt-secret-development-key-for-local-microservices}
+    networks:
+      - airflytrip-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     networks:
       - airflytrip-network
 

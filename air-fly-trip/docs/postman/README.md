@@ -1,21 +1,29 @@
 # Air-Fly-Trip Postman
 
-Importa la coleccion:
+Este directorio contiene la coleccion principal para probar el ecosistema completo desde Postman.
 
-- `docs/postman/air-fly-trip-complete.postman_collection.json`
+## Archivo recomendado
 
-## Flujo recomendado
+Importa este archivo:
 
-1. Ejecuta `auth-service -> POST /api/v1/auth/login`.
-2. La coleccion guarda automaticamente `token` y `logged_user_id`.
-3. Usa ese token para todos los endpoints protegidos.
-4. Si quieres crear un usuario con rol distinto, usa `POST /api/v1/auth/users` con token de `ADMIN`.
+- [air-fly-trip-complete.postman_collection.json](</C:/Duoc/FullStack I/proyecto-semestral/air-fly-trip/docs/postman/air-fly-trip-complete.postman_collection.json>)
+
+## Que hace la coleccion principal
+
+- usa `api-gateway` para todos los endpoints `/api/v1/*`
+- usa los puertos directos de cada microservicio solo para `GET /health`
+- guarda `token` y `logged_user_id` automaticamente despues del login
+- incluye variables listas para pruebas locales
+- evita colisiones en registro y creacion de usuarios usando correos dinamicos
 
 ## Variables incluidas
 
-La coleccion ya trae variables con los puertos locales del stack y con IDs semilla para probar rapido.
+### Infraestructura
 
-### Bases URL
+- `base_url_gateway = http://localhost:8080`
+- `base_url_eureka = http://localhost:8761`
+
+### Bases URL directas por servicio
 
 - `base_url_auth = http://localhost:8082`
 - `base_url_terminal = http://localhost:8083`
@@ -28,10 +36,15 @@ La coleccion ya trae variables con los puertos locales del stack y con IDs semil
 - `base_url_notification = http://localhost:8090`
 - `base_url_charging_station = http://localhost:8091`
 
-### IDs y valores de apoyo
+### Autenticacion
 
+- `auth_admin_email = admin@airflytrip.cl`
+- `auth_admin_password = admin123`
 - `token`
 - `logged_user_id`
+
+### IDs y valores auxiliares
+
 - `new_user_id`
 - `seed_user_id = 3`
 - `terminal_id = 1`
@@ -49,7 +62,7 @@ La coleccion ya trae variables con los puertos locales del stack y con IDs semil
 - `notification_type = SYSTEM`
 - `notification_status = PENDING`
 
-### Estados de ejemplo para `PATCH`
+### Estados de ejemplo
 
 - `station_update_status = MAINTENANCE`
 - `vehicle_update_status = CHARGING`
@@ -58,9 +71,21 @@ La coleccion ya trae variables con los puertos locales del stack y con IDs semil
 - `payment_update_status = APPROVED`
 - `notification_update_status = SENT`
 
-## Comentarios rapidos
+## Flujo recomendado en Postman
 
-- `POST /api/v1/auth/register` siempre crea `CLIENT`.
-- `POST /api/v1/auth/users` respeta el rol y requiere token valido.
-- Los endpoints publicos reales en esta coleccion son solo los `GET /health` y los dos endpoints de autenticacion inicial (`register` y `login`).
-- Para el resto, la coleccion ya manda `Authorization: Bearer {{token}}`.
+1. Levanta el stack con Docker Compose.
+2. Importa `air-fly-trip-complete.postman_collection.json`.
+3. Ejecuta la carpeta `infraestructura`.
+4. Ejecuta `POST /api/v1/auth/login`.
+5. Usa el resto de carpetas para probar endpoints autenticados por gateway.
+
+## Endpoints que conviene ejecutar primero
+
+- `infraestructura -> GET / eureka-server`
+- `infraestructura -> GET /eureka/apps`
+- `auth-service -> POST /api/v1/auth/login`
+- `auth-service -> GET /api/v1/auth/me`
+
+## Nota importante
+
+La coleccion ya trae variables de coleccion y no depende de un environment externo para cargarse correctamente en Postman.

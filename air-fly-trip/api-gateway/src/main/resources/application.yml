@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth_route
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/v1/auth/**
+            - id: route_route
+              uri: lb://route-service
+              predicates:
+                - Path=/api/v1/routes/**
+            - id: vehicle_route
+              uri: lb://vehicle-service
+              predicates:
+                - Path=/api/v1/vehicles/**
+            - id: trip_route
+              uri: lb://trip-service
+              predicates:
+                - Path=/api/v1/trips/**
+            - id: payment_route
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/v1/payments/**
+            - id: terminal_route
+              uri: lb://terminal-service
+              predicates:
+                - Path=/api/v1/terminals/**
+            - id: charging_station_route
+              uri: lb://charging-station-service
+              predicates:
+                - Path=/api/v1/charging-stations/**
+            - id: reservation_route
+              uri: lb://reservation-service
+              predicates:
+                - Path=/api/v1/reservations/**
+            - id: tariff_route
+              uri: lb://tariff-service
+              predicates:
+                - Path=/api/v1/tariffs/**
+            - id: notification_route
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/v1/notifications/**
+server:
+  port: 8080
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
